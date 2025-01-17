@@ -24,5 +24,7 @@ public class LoginController : MonoBehaviour
     public void PushLodinButton()
     {
         DBController.Instance.Login(IDText.text, PasswardText.text);
+        IDText.text = string.Empty;
+        PasswardText.text = string.Empty;
     }
 }

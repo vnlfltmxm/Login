@@ -103,7 +103,7 @@ public class DBController : Singleton<DBController>
 
 
     }
-    public bool CheckID(string id)
+    private bool CheckID(string id)
     {
         //string cleanedID = id.Trim().Replace("\u200B", ""); // Zero-Width Space 제거
         try
@@ -188,5 +188,46 @@ public class DBController : Singleton<DBController>
             }
         }
     }
+
+    public void SignIn(string id, string password)
+    {
+        if (!CheckID(id))
+        {
+            try
+            {
+                if(sqlConn.State == ConnectionState.Closed)
+                {
+                    sqlConn.Open();
+                }
+
+                string qurey = "INSERT INTO study (ID , Passward) VALUES(@id , @passward)";
+                MySqlCommand cmd = new MySqlCommand(qurey, sqlConn);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Parameters.AddWithValue("@passward", password);
+
+                int rowsAffected = cmd.ExecuteNonQuery();//쿼리를 실행하는 메서드 없으면 실행이 안됨
+
+                if (rowsAffected > 0)
+                {
+                    Debug.Log("회원가입 완료");
+                }
+                else
+                {
+                    Debug.Log("값 추가가 안됨");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+                return;
+            }
+        }
+        else
+        {
+            Debug.Log("아이디 있음"); 
+        }
+        
+    }
+
 
 }
