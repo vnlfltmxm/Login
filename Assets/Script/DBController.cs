@@ -5,7 +5,9 @@ using System.Data;
 using MySql.Data.MySqlClient;
 using Unity.VisualScripting;
 using UnityEditor.Search;
+using System.Security.Cryptography;
 using System;
+using System.Text;
 
 public class DBController : Singleton<DBController>
 {
@@ -161,9 +163,10 @@ public class DBController : Singleton<DBController>
             MySqlCommand cmd = new MySqlCommand(qurey, sqlConn);
             cmd.Parameters.AddWithValue("@id", id);
 
+            string hashedPassword = HashSHA256(passward);
             string dbPassward = cmd.ExecuteScalar().ToString();
 
-            if (dbPassward != passward)
+            if (dbPassward != hashedPassword)
             {
                 Debug.Log("비번 틀림");
                 return false;
@@ -199,11 +202,11 @@ public class DBController : Singleton<DBController>
                 {
                     sqlConn.Open();
                 }
-
+                string hashedPassword = HashSHA256(password); // 비밀번호 해시화
                 string qurey = "INSERT INTO study (ID , Passward) VALUES(@id , @passward)";
                 MySqlCommand cmd = new MySqlCommand(qurey, sqlConn);
                 cmd.Parameters.AddWithValue("@id", id);
-                cmd.Parameters.AddWithValue("@passward", password);
+                cmd.Parameters.AddWithValue("@passward", hashedPassword);
 
                 int rowsAffected = cmd.ExecuteNonQuery();//쿼리를 실행하는 메서드 없으면 실행이 안됨
 
@@ -229,5 +232,17 @@ public class DBController : Singleton<DBController>
         
     }
 
-
+    public static string HashSHA256(string input)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input)); // 입력 문자열을 UTF-8 바이트 배열로 변환 후 해시
+            StringBuilder builder = new StringBuilder();
+            foreach (byte b in bytes)
+            {
+                builder.Append(b.ToString("x2")); // 바이트 값을 16진수 문자열로 변환
+            }
+            return builder.ToString(); // 최종 해시 문자열 반환
+        }
+    }
 }
