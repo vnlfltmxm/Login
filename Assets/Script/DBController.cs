@@ -224,6 +224,13 @@ public class DBController : Singleton<DBController>
                 Debug.Log(e.Message);
                 return;
             }
+            finally
+            {
+                if (sqlConn.State == ConnectionState.Open)
+                {
+                    sqlConn.Close();
+                }
+            }
         }
         else
         {
